@@ -1,0 +1,26 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class UsersTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        $user =
+            [
+                'name'=>'User',
+                'email'=>'admin@promina.com',
+                'password'=> bcrypt('password'),
+            ];
+
+
+        User::create($user);
+    }
+}
