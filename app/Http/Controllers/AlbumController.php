@@ -25,7 +25,7 @@ class AlbumController extends Controller
      */
     public function index()
     {
-        $albums=Album::all();
+        $albums=Album::with('pictures')->get();
         return view('albums.index',compact('albums'));
     }
     public function create()
@@ -83,8 +83,19 @@ class AlbumController extends Controller
         }
         return redirect()->back()->with('success','Album updated successfully');
     }
-    public function destroy($id)
+    public function destroy($id,Request $request)
     {
+        $album=Album::findOrFail($id);
+        if($request->delete_type==1){
+            Picture::where('album_id',$album->id)->delete();
+        }else{
+            if($request->album_id){
+                Picture::where('album_id',$album->id)->update(['album_id'=>$request->album_id]);
+            }
+
+        }
+        $album->delete();
+        return redirect()->back()->with('success','Album deleted successfully');
     }
     public function upload_picture(Request $request)
     {
