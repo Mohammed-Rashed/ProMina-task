@@ -20,6 +20,8 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::post('/upload-picture', [App\Http\Controllers\AlbumController::class, 'upload_picture'])->name('upload-picture');
+Route::post('/delete-picture', [App\Http\Controllers\AlbumController::class, 'delete_picture'])->name('delete-picture');
 
 
 Route::resource('albums', App\Http\Controllers\AlbumController::class);

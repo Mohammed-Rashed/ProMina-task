@@ -3,7 +3,11 @@
     <!-- jQuery -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/dropzone.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/dropzone.js"></script>
-
+    <style>
+        .dz-image{
+            /*width: 100%!important;*/
+        }
+    </style>
 @endsection
 @section('content')
 <div class="container">
@@ -14,16 +18,17 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/home">Home</a></li>
                     <li class="breadcrumb-item"><a href="/albums">Albums</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Create</li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit {{$album->name}}</li>
                 </ol>
             </nav>
             @include('layouts.message')
             <div class="bg-white p-5 rounded">
-                <form method="POST" action="/albums">
+                <form method="POST" action="/albums/{{$album->id}}">
+                    @method('PATCH')
                     @csrf
                     <div class="mb-3">
                         <label for="" class="form-label">Name</label>
-                        <input type="text" required class="form-control" name="name" value="{{old('name')}}" >
+                        <input type="text" required class="form-control" name="name" value="{{old('name',$album->name)}}" >
                     </div>
                     <div class="mb-3">
                         <label for="" class="form-label">Pictures</label>
@@ -50,6 +55,7 @@
 
         Dropzone.autoDiscover = false;
 
+        var existingFiles = {!! json_encode($album->pictures) !!}; // Assuming you have images associated with the post
         var myDropzone
         function dropOnInit(){
             var myDropzone = new Dropzone(".dropzone", {
@@ -75,13 +81,32 @@
                 dictRemoveFile: "Remove",
                 dictMaxFilesExceeded: "Only  files are allowed",
                 dictDefaultMessage: "Drop files here to upload",
+                init: function () {
+                    var thisDropzone = this;
+                    existingFiles.forEach(function (file) {
+                        var mockFile = {
+                            name: file.name,
+                            id: file.id
+                        };
+                        thisDropzone.emit("addedfile", mockFile);
+                        thisDropzone.emit("thumbnail", mockFile, file.name);
+                        thisDropzone.emit("complete", mockFile);
+                    });
+                },
             });
             myDropzone.on("addedfile", function(file) {
                 console.log(file);
             });
 
             myDropzone.on("removedfile", function(file) {
-                var result = arrayRemove(pictures_files, parseInt(file.xhr.responseText));
+                if(file.xhr){
+                    var result = arrayRemove(pictures_files, parseInt(file.xhr.responseText));
+
+                }else{
+                    var result = arrayRemove(pictures_files, parseInt(file.id));
+                    deletePicture(file)
+
+                }
                 pictures_files=result
                 $('#pictures').val(pictures_files)
                 if(pictures_files.length>0){
@@ -122,10 +147,17 @@
 
         }
         function deletePicture(file){
-
-            var form_data = {
-                id : file.xhr.responseText,
+            var form_data
+            if(file.xhr){
+                form_data = {
+                    id : file.xhr.responseText,
+                }
+            }else{
+                form_data = {
+                    id : file.id,
+                }
             }
+
 
             var resp_data_format="";
             $.ajax({
@@ -135,7 +167,6 @@
                 dataType : "json",
                 headers:{'X-CSRF-TOKEN': "{{csrf_token()}}"},
                 success : function(response) {
-
                     // alert('deleted')
                 }
             });
