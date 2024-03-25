@@ -14,3 +14,4 @@ Provide step-by-step instructions on how to install the project. Include any pre
 9. `npm run dev'
 10. credentials to login : <h3>email : admin@promina.com</h3>  <h3>password: password</h3>
 11. Serve the application: `php artisan serve`
+12. If you have issues with database you can use this schema `https://drive.google.com/file/d/11jyyRr_dOQ7874DtC82rXFzR5UixB9m7/view?usp=sharing`
